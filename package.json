@@ -1,0 +1,46 @@
+{
+  "name": "chargily-pay-javascript",
+  "version": "0.0.1-alpha",
+  "description": "JavaScript Library for Chargily Pay™ Gateway - V2. The easiest and free way to integrate e-payment API through EDAHABIA of Algerie Poste and CIB of SATIM into your JS project.",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "files": [
+    "lib"
+  ],
+  "scripts": {
+    "dev": "nodemon --exec ts-node ./src/index.ts",
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chargily/chargily-pay-javascript.git"
+  },
+  "keywords": [
+    "chargily",
+    "payment",
+    "gateway",
+    "e-payment",
+    "algeria",
+    "edahabia",
+    "cib",
+    "javascript",
+    "typescript"
+  ],
+  "author": {
+    "name": "Abderraouf Zine",
+    "email": "rofazayn@gmail.com",
+    "url": "https://github.com/rofazayn"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/chargily/chargily-pay-javascript/issues"
+  },
+  "homepage": "https://github.com/chargily/chargily-pay-javascript#readme",
+  "devDependencies": {
+    "@types/node": "^14.0.0",
+    "nodemon": "^3.1.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^4.9.5"
+  }
+}
