@@ -2,7 +2,7 @@
 
 ## Introduction
 
-The Chargily Pay JavaScript Library offers a convenient way to integrate the Chargily e-payment gateway with JavaScript applications. Developed by Abderraouf Zine, a passionate software engineer, this library supports various operations such as managing customers, products, prices, and checkouts, as well as generating payment links and retrieving account balances. It is designed for use in both Node.js and browser environments.
+The Chargily Pay JavaScript Library offers a convenient way to integrate the Chargily e-payment gateway with JavaScript applications. This library supports various operations such as managing customers, products, prices, and checkouts, as well as generating payment links and retrieving account balances. It is designed for use in both Node.js and browser environments.
 
 ## Key Features
 
@@ -16,18 +16,18 @@ The Chargily Pay JavaScript Library offers a convenient way to integrate the Cha
 
 To include this library in your project, you can use npm or yarn:
 
-`npm install chargily-pay-javascript`
+`npm install @chargily/pay`
 
 or
 
-`yarn add chargily-pay-javascript`
+`yarn add @chargily/pay`
 
 ## Getting Started
 
 Before utilizing the library, you must configure it with your [Chargily API key](https://dev.chargily.com/pay-v2/api-keys) and specify the mode (test or live). Here's an example to get started:
 
 ```ts
-import { ChargilyClient } from 'chargily-pay-javascript';
+import { ChargilyClient } from '@chargily/pay';
 
 const client = new ChargilyClient({
   api_key: 'YOUR_API_KEY_HERE',
@@ -413,11 +413,11 @@ This returns a paginated list of all payment links you've created.
 
 ## Final Notes
 
-This documentation covers the basic functionality of the `chargily-pay-javascript` library. For more advanced features and comprehensive details, refer to the official [Chargily Pay API documentation](https://dev.chargily.com/pay-v2/introduction).
+This documentation covers the basic functionality of the `@chargily/pay` library. For more advanced features and comprehensive details, refer to the official [Chargily Pay API documentation](https://dev.chargily.com/pay-v2/introduction).
 
-By integrating the `chargily-pay-javascript` library into your project, you're equipped to seamlessly incorporate Chargily's payment gateway, enhancing your application's payment processing capabilities.
+By integrating the `@chargily/pay` library into your project, you're equipped to seamlessly incorporate Chargily's payment gateway, enhancing your application's payment processing capabilities.
 
-If you encounter any issues or have further questions, please visit our [GitHub repository](https://github.com/chargily/chargily-pay-javascript) to report issues or seek guidance.
+If you encounter any issues or have further questions, please visit our [GitHub repository](https://github.com/chargily/@chargily/pay) to report issues or seek guidance.
 
 Happy coding!
 
