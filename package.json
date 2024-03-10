@@ -1,5 +1,5 @@
 {
-  "name": "chargily-pay-javascript",
+  "name": "@chargily/pay",
   "version": "0.0.1-alpha",
   "description": "JavaScript Library for Chargily Pay™ Gateway - V2. The easiest and free way to integrate e-payment API through EDAHABIA of Algerie Poste and CIB of SATIM into your JS project.",
   "main": "lib/index.js",
