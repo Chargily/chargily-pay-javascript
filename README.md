@@ -1,7 +1,9 @@
 # Welcome to JavaScript Package Repository
 # for [Chargily Pay](https://chargily.com/business/pay "Chargily Pay")™ Gateway - V2.
 
-Thank you for your interest in JS Package of Chargily Pay™, an open source project by Chargily, a leading fintech company in Algeria specializing in payment solutions and  e-commerce facilitating, this Package is providing the easiest and free way to integrate e-payment API through widespread payment methods in Algeria such as EDAHABIA (Algerie Post) and CIB (SATIM) into your JavaScript/Node.js projects.
+Thank you for your interest in JS Package of Chargily Pay™, an open source project by Chargily, a leading fintech company in Algeria specializing in payment solutions and  e-commerce facilitating, this Package is providing the easiest and free way to integrate e-payment API through widespread payment methods in Algeria such as EDAHABIA (Algerie Post) and CIB (SATIM) into your JavaScript/Node.js back-end projects.
+
+**IMPORTANT: This package is meant to be ONLY used in the server-side**
 
 This package is developed by **Abderraouf Zine ([rofazayn](https://github.com/rofazayn))** and is open to contributions from developers like you.
 
@@ -13,7 +15,7 @@ This package is developed by **Abderraouf Zine ([rofazayn](https://github.com/ro
 - Comprehensive management of customers, products, and prices
 - Efficient handling of checkouts and payment links
 - Compatible with Node.js and browser environments
-- Support for webhooks (server-side only)
+- Support for webhooks.
 
 ## Installation
 
@@ -27,7 +29,6 @@ or
 
 ```shell
 yarn add @chargily/chargily-pay
-
 ```
 
 ## Getting Started
@@ -38,7 +39,7 @@ Before utilizing the library, you must configure it with your [Chargily API key]
 import { ChargilyClient } from '@chargily/chargily-pay';
 
 const client = new ChargilyClient({
-  api_key: 'YOUR_API_KEY_HERE',
+  api_key: 'YOUR_API_SECRET_KEY_HERE',
   mode: 'test', // Change to 'live' when deploying your application
 });
 ```
@@ -81,7 +82,7 @@ import bodyParser from 'body-parser';
 import express, { Request, Response } from 'express';
 import { verifySignature } from '@chargily/chargily-pay';
 
-const API_SECRET_KEY = 'test_secret_key_here';
+const API_SECRET_KEY = 'YOUR_API_SECRET_KEY_HERE';
 
 const app = express();
 const port = 4000;
