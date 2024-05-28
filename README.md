@@ -13,6 +13,7 @@ This package is developed by **Abderraouf Zine ([rofazayn](https://github.com/ro
 - Comprehensive management of customers, products, and prices
 - Efficient handling of checkouts and payment links
 - Compatible with Node.js and browser environments
+- Support for webhooks (server-side only)
 
 ## Installation
 
@@ -26,6 +27,7 @@ or
 
 ```shell
 yarn add @chargily/chargily-pay
+
 ```
 
 ## Getting Started
@@ -42,6 +44,102 @@ const client = new ChargilyClient({
 ```
 
 This initializes the Chargily client, ready for communication with the Chargily Pay API.
+
+## Webhooks Notice
+
+**Important Notice:**
+
+Using webhooks is only suitable for back-end environments.
+
+Webhooks allow your application to react to events from Chargily Pay by receiving HTTP requests with JSON payloads. To set up and handle webhooks securely, you must implement them on a server-side environment. This ensures the proper verification and processing of webhook events without exposing sensitive information or risking security issues.
+
+When implementing webhooks:
+
+1. **Verify the Signature:** Ensure the request is legitimate and untampered.
+2. **Identify the Event:** Use the event type to determine the action.
+3. **Handle the Event:** Execute the necessary actions based on the event type.
+4. **Respond with 200:** Confirm receipt of the webhook.
+
+### Example Webhook Endpoint
+
+We will be using express for this example, so first let's install some dependencies.
+
+```shell
+npm install express body-parser
+```
+
+Then install the needed types for express
+
+```shell
+npm i @types/express --save-dev
+```
+
+Now, here's how you can set up a secure webhook endpoint using Express:
+
+```ts
+import bodyParser from 'body-parser';
+import express, { Request, Response } from 'express';
+import { verifySignature } from '@chargily/chargily-pay';
+
+const API_SECRET_KEY = 'test_secret_key_here';
+
+const app = express();
+const port = 4000;
+
+// Middleware to capture raw body as Buffer
+app.use(
+  bodyParser.json({
+    verify: (req: Request, res: Response, buf: Buffer) => {
+      (req as any).rawBody = buf;
+    },
+  })
+);
+
+app.post('/webhook', (req: Request, res: Response) => {
+  const signature = req.get('signature') || '';
+  const payload = (req as any).rawBody;
+
+  if (!signature) {
+    console.log('Signature header is missing');
+    res.sendStatus(400);
+    return;
+  }
+
+  try {
+    if (!verifySignature(payload, signature, API_SECRET_KEY)) {
+      console.log('Signature is invalid');
+      res.sendStatus(403);
+      return;
+    }
+  } catch (error) {
+    console.log(
+      'Something happened while trying to process the request to the webhook'
+    );
+    res.sendStatus(403);
+    return;
+  }
+
+  const event = req.body;
+  // You can use the event.type here to implement your own logic
+  console.log(event);
+
+  res.sendStatus(200);
+});
+
+app.listen(port, () => {
+  console.log(`Server is running at http://localhost:${port}`);
+});
+```
+
+One more thing, if you wish to test your local webhook, we recommend using a tool like [NGROK](https://ngrok.com).
+
+You can run ngrok to open a tunnel to your local machine using this command
+
+```shell
+ngrok http 4000 # or the port you are using
+```
+
+Ngrok will then return a public endpoint that you can add to Chargily's dashboard, by going [here](https://pay.chargily.com/test/dashboard/developers-corner) and pasting your endpoint in the webhook endpoint field. Also, make sure you don't forget to add `/webhook` or whatever url extension you used to the URL you paste there.
 
 ## Creating a Customer
 

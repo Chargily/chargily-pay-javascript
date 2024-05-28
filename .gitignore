@@ -26,3 +26,7 @@ yarn-error.log*
 
 # IDE
 .vscode
+
+# Other
+.DS_Store
+src/test.ts
