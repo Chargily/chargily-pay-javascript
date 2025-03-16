@@ -5,7 +5,7 @@ Thank you for your interest in JS Package of Chargily Pay™, an open source pro
 
 **IMPORTANT: This package is meant to be ONLY used in the server-side**
 
-This package is developed by **Abderraouf Zine ([rofazayn](https://github.com/rofazayn))** and is open to contributions from developers like you.
+This package is developed by **Abderraouf Zine ([ruzolut](https://github.com/ruzolut))** and is open to contributions from developers like you.
 
 
 ## Key Features
