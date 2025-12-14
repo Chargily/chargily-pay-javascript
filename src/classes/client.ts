@@ -307,6 +307,11 @@ export class ChargilyClient {
       );
     }
 
+    // createCheckout class accepts empty Array (items[]) from src/types/params which is by nature truthy - the code above's validation bypassed and invalid checkout may be created.
+    if (!checkout_data.items || checkout_data.items.length === 0){
+      throw new Error('The items field is required.');
+    }
+
     return this.request('checkouts', 'POST', checkout_data);
   }
 
