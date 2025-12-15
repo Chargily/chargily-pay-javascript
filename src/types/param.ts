@@ -91,7 +91,10 @@ export interface CheckoutItemParams {
 
 export interface CreateCheckoutParams {
   /** Required if amount and currency are not provided: An array of items being purchased. */
-  items?: CheckoutItemParams[];
+  
+  //Using a non-empty tuple prevents passing an empty array ([])
+  // at compile time, since empty arrays are otherwise valid and truthy in JS.
+    items?: [CheckoutItemParams, ...CheckoutItemParams[]];
 
   /** Required if items are not provided: The total amount of the checkout. */
   amount?: number;
