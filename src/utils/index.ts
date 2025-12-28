@@ -28,11 +28,11 @@ export function verifySignature(
 
   if (
     signatureBuffer.length !== digest.length ||
-    !crypto.timingSafeEqual(digest, signatureBuffer)
   ) {
     throw new Error('The signature is invalid.');
   }
-
-  console.log('The signature is valid');
+  if(crypto.timingSafeEqual(digest, signatureBuffer){
+    throw new Error('invalid signature: content mismatch') 
+  }
   return true;
 }
