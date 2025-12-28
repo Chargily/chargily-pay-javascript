@@ -27,7 +27,7 @@ export function verifySignature(
   const signatureBuffer = Buffer.from(signature, 'utf8');
 
   if (
-    signatureBuffer.length !== digest.length ||
+    signatureBuffer.length !== digest.length
   ) {
     throw new Error('The signature is invalid.');
   }
