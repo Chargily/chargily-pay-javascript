@@ -31,7 +31,7 @@ export function verifySignature(
   ) {
     throw new Error('The signature is invalid.');
   }
-  if(crypto.timingSafeEqual(digest, signatureBuffer){
+  if(!crypto.timingSafeEqual(digest, signatureBuffer){
     throw new Error('invalid signature: content mismatch') 
   }
   return true;
