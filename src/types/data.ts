@@ -185,6 +185,9 @@ export interface Checkout {
   /** The language of the checkout page. */
   locale: 'ar' | 'en' | 'fr';
 
+  // AUDIT [HIGH-8]: description, failure_url, webhook_endpoint, and
+  // shipping_address are optional at creation but typed as non-nullable here.
+  // The API returns null when not provided. Fix: Add '| null' to each.
   /** A description of the transaction. */
   description: string;
 
