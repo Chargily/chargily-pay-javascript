@@ -1,5 +1,8 @@
 import { Address } from './data';
 
+// AUDIT [HIGH-4]: All fields are optional — createCustomer({}) compiles but
+// fails at runtime. The API requires at least 'name'.
+// Fix: Make 'name' required, or use a union type to enforce at least one field.
 export interface CreateCustomerParams {
   /** The name of the customer. */
   name?: string;
@@ -76,6 +79,8 @@ export interface CreatePriceParams {
   metadata?: Record<string, any>;
 }
 
+// AUDIT [HIGH-6]: 'metadata' is required instead of optional.
+// Fix: Add '?' to make it optional.
 export interface UpdatePriceParams {
   /** A set of key-value pairs for additional information about the price. */
   metadata: Record<string, any>;
@@ -123,6 +128,8 @@ export interface CreateCheckoutParams {
   /** Optional: The ID of an existing customer. */
   customer_id?: string;
 
+  // AUDIT [HIGH-7]: Type is 'string' here but 'Address' in the Checkout response
+  // type (data.ts). These are incompatible — needs clarification against API spec.
   /** Optional: The shipping address for the checkout. */
   shipping_address?: string;
 

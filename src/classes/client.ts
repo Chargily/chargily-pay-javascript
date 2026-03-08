@@ -52,6 +52,9 @@ export class ChargilyClient {
    * @param {ChargilyClientOptions} options - Configuration options including API key and mode.
    */
   constructor(options: ChargilyClientOptions) {
+    // AUDIT [MEDIUM-3]: No API key validation — empty string accepted silently.
+    // AUDIT [MEDIUM-4]: Invalid mode (e.g. 'staging') defaults to LIVE silently.
+    // This could cause accidental real charges during development.
     this.api_key = options.api_key;
     this.base_url =
       options.mode === 'test' ? CHARGILY_TEST_URL : CHARGILY_LIVE_URL;
@@ -85,6 +88,11 @@ export class ChargilyClient {
       fetchOptions.body = JSON.stringify(body);
     }
 
+    // AUDIT [CRITICAL-5]: API error response body is never parsed.
+    // When the API returns 4xx/5xx, the JSON body containing {message, errors}
+    // is discarded. Developers cannot know WHY a call failed.
+    // Proposal: Parse error body and throw a typed ChargilyApiError with
+    // status, statusText, and body instead of a generic Error.
     try {
       const response = await fetch(url, fetchOptions);
 
@@ -157,6 +165,10 @@ export class ChargilyClient {
    * @param {number} [per_page=10] - The number of customers to return per page.
    * @returns {Promise<ListResponse<Customer>>} - A promise that resolves to a paginated list of customers.
    */
+  // AUDIT [HIGH-2]: No 'page' parameter — all list methods are stuck on page 1.
+  // ListResponse has current_page, last_page, next_page_url but they can't be used.
+  // AUDIT [HIGH-5]: No per_page validation — 0, -1, 99999 are sent as-is.
+  // Proposal: Add page param + listAll*() async generators for auto-pagination.
   public async listCustomers(
     per_page: number = 10
   ): Promise<ListResponse<Customer>> {
@@ -189,6 +201,9 @@ export class ChargilyClient {
     product_id: string,
     update_data: UpdateProductParams
   ): Promise<Product> {
+    // AUDIT [CRITICAL-1]: Uses 'POST' instead of 'PATCH'. updateCustomer (line 141)
+    // correctly uses 'PATCH'. This will create duplicates or return 405.
+    // Fix: Change 'POST' to 'PATCH'.
     return this.request(`products/${product_id}`, 'POST', update_data);
   }
 
@@ -260,6 +275,8 @@ export class ChargilyClient {
     price_id: string,
     update_data: UpdatePriceParams
   ): Promise<Price> {
+    // AUDIT [CRITICAL-1]: Same bug — uses 'POST' instead of 'PATCH'.
+    // Fix: Change 'POST' to 'PATCH'.
     return this.request(`prices/${price_id}`, 'POST', update_data);
   }
 
@@ -291,6 +308,10 @@ export class ChargilyClient {
   public async createCheckout(
     checkout_data: CreateCheckoutParams
   ): Promise<Checkout> {
+    // AUDIT [CRITICAL-4]: The https check is dead code because 'https' always
+    // starts with 'http'. Also accepts 'httpanything'. failure_url and
+    // webhook_endpoint are never validated.
+    // Fix: Use new URL() constructor for proper validation on all URL fields.
     if (
       !checkout_data.success_url.startsWith('http') &&
       !checkout_data.success_url.startsWith('https')
@@ -341,6 +362,9 @@ export class ChargilyClient {
    * @param {number} [per_page=10] - The number of items to return per page.
    * @returns {Promise<ListResponse<CheckoutItemParams>>} A paginated list of items in the checkout session.
    */
+  // AUDIT [HIGH-3]: Returns ListResponse<CheckoutItemParams> (input type)
+  // instead of ListResponse<CheckoutItem> (response type with id, amount, etc.).
+  // Fix: Change return type to ListResponse<CheckoutItem>.
   public async getCheckoutItems(
     checkout_id: string,
     per_page: number = 10
@@ -383,6 +407,8 @@ export class ChargilyClient {
     payment_link_id: string,
     update_data: UpdatePaymentLinkParams
   ): Promise<PaymentLink> {
+    // AUDIT [CRITICAL-1]: Same bug — uses 'POST' instead of 'PATCH'.
+    // Fix: Change 'POST' to 'PATCH'.
     return this.request(
       `payment-links/${payment_link_id}`,
       'POST',
@@ -421,6 +447,8 @@ export class ChargilyClient {
    * @param {number} [per_page=10] - The number of items to return per page.
    * @returns {Promise<ListResponse<PaymentLinkItemParams>>} A paginated list of items associated with the payment link.
    */
+  // AUDIT [HIGH-3]: Same issue — returns ListResponse<PaymentLinkItemParams>
+  // instead of ListResponse<PaymentLinkItem>.
   public async getPaymentLinkItems(
     payment_link_id: string,
     per_page: number = 10
