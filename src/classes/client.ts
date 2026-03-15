@@ -1,4 +1,5 @@
 import { CHARGILY_LIVE_URL, CHARGILY_TEST_URL } from '../consts';
+import Bottleneck from 'bottleneck';
 import {
   Balance,
   Checkout,
@@ -33,11 +34,20 @@ export interface ChargilyClientOptions {
    */
   api_key: string;
 
+
   /**
    * Operating mode of the client, indicating whether to use the test or live API endpoints.
    * @type {'test' | 'live'}
    */
   mode: 'test' | 'live';
+
+  // Adding rate limiting options
+  rateLimit?: {
+    enabled?: boolean;
+    maxRequests?: number; // default is 60
+    intervalMs?: number; // default is 60000 (1 minute)
+    minTime?: number; // minimum time between requests in ms
+  }
 }
 
 /**
@@ -46,6 +56,7 @@ export interface ChargilyClientOptions {
 export class ChargilyClient {
   private api_key: string;
   private base_url: string;
+  private limiter: Bottleneck | null = null;
 
   /**
    * Constructs a ChargilyClient instance.
@@ -55,6 +66,25 @@ export class ChargilyClient {
     this.api_key = options.api_key;
     this.base_url =
       options.mode === 'test' ? CHARGILY_TEST_URL : CHARGILY_LIVE_URL;
+    // initialize rate limiter if enabled
+    if (options.rateLimit?.enabled !== false) {
+      const maxRequests = options.rateLimit?.maxRequests || 60;
+      const intervalMs = options.rateLimit?.intervalMs || 60000;
+      const minTime = options.rateLimit?.minTime || 100;
+
+      this.limiter = new Bottleneck({
+        minTime: minTime,
+        maxConcurrent: 5,
+        reservoir: maxRequests,
+        reservoirRefreshAmount: maxRequests,
+        reservoirRefreshInterval: intervalMs
+      });
+
+      // Add error handling for rate limit exceeded
+      this.limiter.on('error', (error) => {
+        console.error('Rate limiter error:', error);
+      });
+    }
   }
 
   /**
@@ -65,39 +95,79 @@ export class ChargilyClient {
    * @returns {Promise<any>} - The JSON response from the API.
    * @private
    */
+
+
+  /**
+ * Internal method to make requests to the Chargily API.
+ * @param {string} endpoint - The endpoint path to make the request to.
+ * @param {string} [method='GET'] - The HTTP method for the request.
+ * @param {Object} [body] - The request payload, necessary for POST or PATCH requests.
+ * @param {number} [retryCount=0] - Current retry attempt count.
+ * @returns {Promise<any>} - The JSON response from the API.
+ * @private
+ */
   private async request(
     endpoint: string,
     method: string = 'GET',
-    body?: any
+    body?: any,
+    retryCount: number = 0
   ): Promise<any> {
-    const url = `${this.base_url}/${endpoint}`;
-    const headers = {
-      Authorization: `Bearer ${this.api_key}`,
-      'Content-Type': 'application/json',
-    };
+    // maximum number of retries for rate limiting
+    const MAX_RETRIES = 3;
 
-    const fetchOptions: RequestInit = {
-      method,
-      headers,
-    };
+    // wrapped request logic to handle rate limiting and retries
+    const executeRequest = async () => {
+      const url = `${this.base_url}/${endpoint}`;
+      const headers = {
+        Authorization: `Bearer ${this.api_key}`,
+        'Content-Type': 'application/json',
+      };
 
-    if (body !== undefined) {
-      fetchOptions.body = JSON.stringify(body);
-    }
+      const fetchOptions: RequestInit = {
+        method,
+        headers,
+      };
 
-    try {
-      const response = await fetch(url, fetchOptions);
-
-      if (!response.ok) {
-        throw new Error(
-          `API request failed with status ${response.status}: ${response.statusText}`
-        );
+      if (body !== undefined) {
+        fetchOptions.body = JSON.stringify(body);
       }
 
-      return response.json();
-    } catch (error) {
-      throw new Error(`Failed to make API request: ${error}`);
-    }
+      try {
+        const response = await fetch(url, fetchOptions);
+
+        if (response.status === 429) {
+          if (retryCount >= MAX_RETRIES) {
+            throw new Error('Rate limit exceeded. Max retries reached.');
+          }
+
+          const retryAfter = response.headers.get('Retry-After');
+          const waitTime = retryAfter ? parseInt(retryAfter) * 1000 : 5000;
+
+          console.warn(
+            `Rate limit exceeded. Retrying after ${waitTime / 1000} seconds...`
+          );
+          await new Promise((resolve) => setTimeout(resolve, waitTime));
+          return this.request(endpoint, method, body, retryCount + 1);
+        }
+
+        if (!response.ok) {
+          throw new Error(
+            `API request failed with status ${response.status}: ${response.statusText}`
+          );
+        }
+
+        return response.json();
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : String(error);
+        throw new Error(`Failed to make API request: ${errorMessage}`);
+      }
+    };
+
+    // Use rate limiter if initialized
+    return this.limiter
+      ? this.limiter.schedule(executeRequest)
+      : executeRequest();
   }
 
   /**
