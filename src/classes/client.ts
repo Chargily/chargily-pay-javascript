@@ -23,6 +23,18 @@ import {
   UpdateProductParams,
 } from '../types/param';
 import { DeleteItemResponse, ListResponse } from '../types/response';
+import { validatePayload } from '../validation/validator';
+import {
+  createCustomerSchema,
+  updateCustomerSchema,
+  createProductSchema,
+  updateProductSchema,
+  createPriceSchema,
+  updatePriceSchema,
+  createCheckoutSchema,
+  createPaymentLinkSchema,
+  updatePaymentLinkSchema,
+} from '../validation/schemas';
 
 /**
  * Configuration options for ChargilyClient.
@@ -186,6 +198,7 @@ export class ChargilyClient {
   public async createCustomer(
     customer_data: CreateCustomerParams
   ): Promise<Customer> {
+    await validatePayload(createCustomerSchema, customer_data, 'Create Customer');
     return this.request('customers', 'POST', customer_data);
   }
 
@@ -208,6 +221,7 @@ export class ChargilyClient {
     customer_id: string,
     update_data: UpdateCustomerParams
   ): Promise<Customer> {
+    await validatePayload(updateCustomerSchema, update_data, 'Update Customer');
     return this.request(`customers/${customer_id}`, 'PATCH', update_data);
   }
 
@@ -246,6 +260,7 @@ export class ChargilyClient {
   public async createProduct(
     product_data: CreateProductParams
   ): Promise<Product> {
+    await validatePayload(createProductSchema, product_data, 'Create Product');
     return this.request('products', 'POST', product_data);
   }
 
@@ -259,6 +274,7 @@ export class ChargilyClient {
     product_id: string,
     update_data: UpdateProductParams
   ): Promise<Product> {
+    await validatePayload(updateProductSchema, update_data, 'Update Product');
     return this.request(`products/${product_id}`, 'POST', update_data);
   }
 
@@ -317,6 +333,7 @@ export class ChargilyClient {
    * @returns {Promise<Price>} The created price object.
    */
   public async createPrice(price_data: CreatePriceParams): Promise<Price> {
+    await validatePayload(createPriceSchema, price_data, 'Create Price');
     return this.request('prices', 'POST', price_data);
   }
 
@@ -330,6 +347,7 @@ export class ChargilyClient {
     price_id: string,
     update_data: UpdatePriceParams
   ): Promise<Price> {
+    await validatePayload(updatePriceSchema, update_data, 'Update Price');
     return this.request(`prices/${price_id}`, 'POST', update_data);
   }
 
@@ -361,22 +379,7 @@ export class ChargilyClient {
   public async createCheckout(
     checkout_data: CreateCheckoutParams
   ): Promise<Checkout> {
-    if (
-      !checkout_data.success_url.startsWith('http') &&
-      !checkout_data.success_url.startsWith('https')
-    ) {
-      throw new Error('Invalid success_url, it must begin with http or https.');
-    }
-
-    if (
-      !checkout_data.items &&
-      (!checkout_data.amount || !checkout_data.currency)
-    ) {
-      throw new Error(
-        'The items field is required when amount and currency are not present.'
-      );
-    }
-
+    await validatePayload(createCheckoutSchema, checkout_data, 'Create Checkout');
     return this.request('checkouts', 'POST', checkout_data);
   }
 
@@ -440,6 +443,7 @@ export class ChargilyClient {
   public async createPaymentLink(
     payment_link_data: CreatePaymentLinkParams
   ): Promise<PaymentLink> {
+    await validatePayload(createPaymentLinkSchema, payment_link_data, 'Create Payment Link');
     return this.request('payment-links', 'POST', payment_link_data);
   }
 
@@ -453,6 +457,7 @@ export class ChargilyClient {
     payment_link_id: string,
     update_data: UpdatePaymentLinkParams
   ): Promise<PaymentLink> {
+    await validatePayload(updatePaymentLinkSchema, update_data, 'Update Payment Link');
     return this.request(
       `payment-links/${payment_link_id}`,
       'POST',

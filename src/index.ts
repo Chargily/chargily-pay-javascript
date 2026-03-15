@@ -15,3 +15,6 @@ export * from './classes/client';
 
 // Exporting all the utility functions from utils folder
 export * from './utils';
+
+// Exporting validation utilities and schemas from validation folder
+export * from './validation';
