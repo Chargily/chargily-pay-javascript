@@ -377,6 +377,20 @@ export class ChargilyClient {
       );
     }
 
+    // require either a non-empty items array or both amount and currency, This prevents empty items arrays from bypassing validation.
+    const hasItems =
+      Array.isArray(checkout_data.items) &&
+      checkout_data.items.length > 0;
+    
+    const hasAmountAndCurrency =
+      typeof checkout_data.amount === 'number' &&
+      typeof checkout_data.currency === 'string';
+    
+    if (!hasItems && !hasAmountAndCurrency) {
+      throw new Error(
+        'Either a non-empty items array or both amount and currency must be provided.'
+      );
+    }
     return this.request('checkouts', 'POST', checkout_data);
   }
 
